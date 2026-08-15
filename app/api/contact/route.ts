@@ -27,7 +27,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, message: 'Project details are required.' }, { status: 400 });
     }
 
-    const recipient = process.env.CONTACT_RECEIVER || process.env.EMAIL_TO || 'info@amfuturetech.com';
+    const recipient = process.env.CONTACT_RECEIVER || process.env.EMAIL_TO || process.env.MAIL_TO || 'info@amfuturetech.com';
 
     await sendEmail({
       to: recipient,
