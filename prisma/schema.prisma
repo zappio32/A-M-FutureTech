@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model ContactEnquiry {
+  id              Int      @id @default(autoincrement())
+  fullName        String
+  companyName     String?
+  email           String
+  phone           String?
+  serviceRequired String?
+  projectBudget   String?
+  projectDetails  String
+  createdAt       DateTime @default(now())
+}
+
+model QuoteRequest {
+  id              Int      @id @default(autoincrement())
+  fullName        String
+  companyName     String?
+  email           String
+  phone           String?
+  serviceRequired String
+  budget          String?
+  projectDetails  String
+  createdAt       DateTime @default(now())
+}
+
+model CareerApplication {
+  id              Int      @id @default(autoincrement())
+  fullName        String
+  email           String
+  phone           String
+  position        String
+  experience      String
+  message         String?
+  resumePath      String?
+  createdAt       DateTime @default(now())
+}
