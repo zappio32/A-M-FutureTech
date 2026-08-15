@@ -41,6 +41,28 @@ export function getSmtpConfig() {
   };
 }
 
+export function getEmailErrorMessage(error: unknown) {
+  if (error instanceof Error) {
+    const message = error.message.toLowerCase();
+
+    if (message.includes('missing smtp configuration') || message.includes('email service is not configured')) {
+      return 'Email service is not configured in the deployment environment.';
+    }
+
+    if (message.includes('authentication failed') || message.includes('535') || message.includes('535-5.7.8')) {
+      return 'SMTP authentication failed. Please verify the email username and Gmail App Password in Railway.';
+    }
+
+    if (message.includes('connection') || message.includes('timed out') || message.includes('econnrefused')) {
+      return 'SMTP connection failed. Please check the SMTP host and port in Railway.';
+    }
+
+    return 'The mail server rejected the request. Please verify the deployment email settings.';
+  }
+
+  return 'The mail server rejected the request. Please verify the deployment email settings.';
+}
+
 export async function sendEmail(options: {
   to: string;
   replyTo?: string;

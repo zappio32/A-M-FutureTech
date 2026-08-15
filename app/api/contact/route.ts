@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { sendEmail } from '@/lib/email';
+import { getEmailErrorMessage, sendEmail } from '@/lib/email';
 import { validateEmail, validatePhone, validateRequired } from '@/lib/validation';
 
 export async function POST(request: Request) {
@@ -77,6 +77,8 @@ export async function POST(request: Request) {
       error: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined,
     });
-    return NextResponse.json({ success: false, message: 'Something went wrong while sending your enquiry.' }, { status: 500 });
+
+    const message = getEmailErrorMessage(error) || 'Something went wrong while sending your enquiry.';
+    return NextResponse.json({ success: false, message }, { status: 500 });
   }
 }
