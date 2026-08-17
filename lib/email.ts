@@ -29,16 +29,17 @@ export function getSmtpConfig() {
     return null;
   }
 
-  return {
-    host,
-    port,
-    secure: port === 465,
-    auth: { user, pass },
-    tls: { rejectUnauthorized: false },
-    connectionTimeout: 30000,
-    greetingTimeout: 30000,
-    socketTimeout: 30000,
-  };
+return {
+  host,
+  port,
+  secure: port === 465,
+  family: 4, // Force IPv4 and avoid Railway IPv6 ENETUNREACH
+  auth: { user, pass },
+  tls: { rejectUnauthorized: false },
+  connectionTimeout: 30000,
+  greetingTimeout: 30000,
+  socketTimeout: 30000,
+};
 }
 
 export function getEmailErrorMessage(error: unknown) {
