@@ -1,26 +1,28 @@
-import nodemailer, { type SendMailOptions } from 'nodemailer';
-
-function getEnv(...keys: string[]) {
-  for (const key of keys) {
-    const value = process.env[key];
-    if (typeof value === 'string' && value.trim()) {
-      return value.trim();
-    }
-  }
-  return '';
-}
-
 export function getSmtpConfig() {
   const host = getEnv('EMAIL_HOST', 'SMTP_HOST', 'MAIL_HOST', 'SMTP_HOSTNAME');
-  const portValue = getEnv('EMAIL_PORT', 'SMTP_PORT', 'MAIL_PORT', 'EMAIL_SMTP_PORT') || '587';
+  const portValue =
+    getEnv('EMAIL_PORT', 'SMTP_PORT', 'MAIL_PORT', 'EMAIL_SMTP_PORT') || '587';
   const user = getEnv('EMAIL_USER', 'SMTP_USER', 'MAIL_USER', 'GMAIL_USER');
-  const pass = getEnv('EMAIL_PASS', 'EMAIL_PASSWORD', 'SMTP_PASSWORD', 'MAIL_PASSWORD', 'GMAIL_APP_PASSWORD');
-  const from = getEnv('EMAIL_FROM', 'SMTP_FROM', 'MAIL_FROM', 'EMAIL_USER', 'SMTP_USER', 'GMAIL_USER');
+  const pass = getEnv(
+    'EMAIL_PASS',
+    'EMAIL_PASSWORD',
+    'SMTP_PASSWORD',
+    'MAIL_PASSWORD',
+    'GMAIL_APP_PASSWORD'
+  );
+  const from = getEnv(
+    'EMAIL_FROM',
+    'SMTP_FROM',
+    'MAIL_FROM',
+    'EMAIL_USER',
+    'SMTP_USER',
+    'GMAIL_USER'
+  );
 
   const port = Number(portValue);
 
   if (!host || !user || !pass || !from) {
-    console.error('[email] Missing SMTP configuration. Required one of: EMAIL_HOST/SMTP_HOST/MAIL_HOST, EMAIL_PORT/SMTP_PORT/MAIL_PORT, EMAIL_USER/SMTP_USER/GMAIL_USER, EMAIL_PASS/EMAIL_PASSWORD/SMTP_PASSWORD/GMAIL_APP_PASSWORD, EMAIL_FROM/SMTP_FROM/MAIL_FROM.');
+    console.error('[email] Missing SMTP configuration.');
     return null;
   }
 
@@ -29,19 +31,23 @@ export function getSmtpConfig() {
     return null;
   }
 
-return {
-  host,
-  port,
-  secure: port === 465,
-  family: 4, // Force IPv4 and avoid Railway IPv6 ENETUNREACH
-  auth: { user, pass },
-  tls: { rejectUnauthorized: false },
-  connectionTimeout: 30000,
-  greetingTimeout: 30000,
-  socketTimeout: 30000,
-};
+  return {
+    host,
+    port,
+    secure: port === 465,
+    family: 4,
+    auth: {
+      user,
+      pass,
+    },
+    tls: {
+      rejectUnauthorized: false,
+    },
+    connectionTimeout: 30000,
+    greetingTimeout: 30000,
+    socketTimeout: 30000,
+  };
 }
-
 export function getEmailErrorMessage(error: unknown) {
   if (error instanceof Error) {
     const message = error.message.toLowerCase();
