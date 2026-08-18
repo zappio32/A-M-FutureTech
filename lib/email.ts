@@ -26,7 +26,7 @@ export function getSmtpConfig() {
       'SMTP_PORT',
       'MAIL_PORT',
       'EMAIL_SMTP_PORT'
-    ) || '587';
+    ) || '465';
 
   const user = getEnv(
     'EMAIL_USER',
@@ -88,19 +88,22 @@ export function getSmtpConfig() {
     from,
   });
 
-  return {
-    host,
-  port: 587,
-  secure: false,
+ return {
+  host,
+  port,
+
+  // Titan SMTP port 465 uses SSL
+  secure: true,
+
   auth: {
     user,
     pass,
   },
-  requireTLS: true,
+
   connectionTimeout: 30000,
   greetingTimeout: 30000,
   socketTimeout: 30000,
-  };
+};
 }
 
 export function getEmailErrorMessage(error: unknown) {
