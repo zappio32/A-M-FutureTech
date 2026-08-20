@@ -1,14 +1,19 @@
-export function Logo() {
+import Image from 'next/image';
+
+const logoAlt = 'A&M FutureTech Solutions Pvt. Ltd. Logo';
+
+export function Logo({ className = '' }: { className?: string }) {
   return (
-    <div className="flex items-center gap-3">
-      <div className="relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-2xl border border-blue-400/40 bg-gradient-to-br from-blue-500 via-cyan-400 to-violet-500 shadow-glow">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.7),transparent_55%)]" />
-        <span className="relative text-lg font-black tracking-tight text-white">A&M</span>
-      </div>
-      <div>
-        <div className="text-base font-extrabold tracking-tight text-white">FutureTech</div>
-        <div className="text-[10px] uppercase tracking-[0.22em] text-slate-300">Solution Pvt Ltd</div>
-      </div>
+    <div className={`flex min-w-0 items-center ${className}`}>
+      <Image
+        src="/images/company-logo.png"
+        alt={logoAlt}
+        width={891}
+        height={891}
+        priority
+        sizes="(max-width: 639px) 72px, (max-width: 1023px) 84px, 96px"
+        className="h-[4.5rem] w-[4.5rem] object-contain sm:h-[5.25rem] sm:w-[5.25rem] lg:h-24 lg:w-24"
+      />
     </div>
   );
 }

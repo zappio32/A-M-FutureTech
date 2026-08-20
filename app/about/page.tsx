@@ -1,6 +1,7 @@
 import { Header } from '@/components/Header';
 import { siteConfig } from '@/lib/site-data';
 import { CheckCircle2 } from 'lucide-react';
+import Image from 'next/image';
 
 export default function AboutPage() {
   return (
@@ -8,8 +9,22 @@ export default function AboutPage() {
       <Header />
       <section className="section-shell">
         <div className="container max-w-5xl">
-          <span className="badge">About us</span>
-          <h1 className="section-title mt-6">Building the Future Through Technology</h1>
+          <div className="grid items-center gap-8 md:grid-cols-[auto_1fr]">
+            <div className="flex h-36 w-36 items-center justify-center rounded-2xl border border-white/10 bg-white p-3 shadow-lg shadow-slate-950/20">
+              <Image
+                src="/images/company-logo.png"
+                alt="A&M FutureTech Solutions Pvt. Ltd. Logo"
+                width="891"
+                height="891"
+                sizes="144px"
+                className="h-full w-full object-contain"
+              />
+            </div>
+            <div>
+              <span className="badge">About us</span>
+              <h1 className="section-title mt-6">Building the Future Through Technology</h1>
+            </div>
+          </div>
           <p className="section-subtitle mt-4">
             A&M FutureTech Solution Pvt Ltd is an IT company focused on delivering reliable, scalable,
             innovative, and customized digital solutions for businesses that want to operate with confidence and grow faster.

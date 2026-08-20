@@ -419,7 +419,13 @@ export default function HomePage() {
         <div className="container py-16">
           <div className="grid gap-10 md:grid-cols-2 xl:grid-cols-5">
             <div className="xl:col-span-2">
-              <Logo />
+              <div className="flex flex-wrap items-center gap-4">
+                <Logo />
+                <div>
+                  <p className="font-semibold text-white">A&amp;M FutureTech Solutions Pvt. Ltd.</p>
+                  <p className="mt-1 text-sm tracking-[0.16em] text-cyan-300">Innovate | Integrate | Elevate</p>
+                </div>
+              </div>
               <p className="mt-5 max-w-md text-slate-300">
                 We build secure, scalable, high-performance digital products for businesses ready to grow with modern technology.
               </p>

@@ -12,7 +12,7 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-slate-950/70 backdrop-blur-xl supports-[backdrop-filter]:bg-slate-950/55">
       <div className="container flex items-center justify-between py-3.5">
-        <Link href="#home" aria-label="A&M FutureTech home" className="flex items-center" onClick={() => setMobileOpen(false)}>
+        <Link href="/" aria-label="A&M FutureTech home" className="flex items-center" onClick={() => setMobileOpen(false)}>
           <Logo />
         </Link>
 

@@ -1,6 +1,6 @@
 import nodemailer, { type SendMailOptions } from 'nodemailer';
 
-function getEnv(...keys: string[]) {
+function getEnv(...keys: string[]): string {
   for (const key of keys) {
     const value = process.env[key];
 
@@ -12,103 +12,84 @@ function getEnv(...keys: string[]) {
   return '';
 }
 
+/**
+ * Titan Email SMTP configuration
+ *
+ * SMTP:
+ * Host: smtp.titan.email
+ * Port: 465
+ * Security: SSL
+ */
 export function getSmtpConfig() {
-  const host = getEnv(
-    'EMAIL_HOST',
-    'SMTP_HOST',
-    'MAIL_HOST',
-    'SMTP_HOSTNAME'
-  );
+  const host = getEnv('EMAIL_HOST') || 'smtp.titan.email';
 
-  const portValue =
-    getEnv(
-      'EMAIL_PORT',
-      'SMTP_PORT',
-      'MAIL_PORT',
-      'EMAIL_SMTP_PORT'
-    ) || '465';
+  const user = getEnv('EMAIL_USER');
 
-  const user = getEnv(
-    'EMAIL_USER',
-    'SMTP_USER',
-    'MAIL_USER',
-    'GMAIL_USER'
-  );
+  const pass = getEnv('EMAIL_PASS');
 
-  const pass = getEnv(
-    'EMAIL_PASS',
-    'EMAIL_PASSWORD',
-    'SMTP_PASSWORD',
-    'MAIL_PASSWORD',
-    'GMAIL_APP_PASSWORD'
-  );
+  const from = getEnv('EMAIL_FROM') || user;
 
-  const from = getEnv(
-    'EMAIL_FROM',
-    'SMTP_FROM',
-    'MAIL_FROM',
-    'EMAIL_USER',
-    'SMTP_USER',
-    'GMAIL_USER'
-  );
+  // For Titan, keep the SMTP port fixed at 465.
+  // This prevents old Railway variables such as SMTP_PORT=587
+  // from accidentally overriding the configuration.
+  const port = 465;
 
-  const port = Number(portValue);
-
+  // -----------------------------
   // Validate configuration
+  // -----------------------------
+
   if (!host) {
     console.error('[email] SMTP host is missing.');
     return null;
   }
 
   if (!user) {
-    console.error('[email] SMTP username is missing.');
+    console.error('[email] EMAIL_USER is missing.');
     return null;
   }
 
   if (!pass) {
-    console.error('[email] SMTP password/App Password is missing.');
+    console.error('[email] EMAIL_PASS is missing.');
     return null;
   }
 
   if (!from) {
-    console.error('[email] FROM email address is missing.');
+    console.error('[email] EMAIL_FROM is missing.');
     return null;
   }
 
-  if (!Number.isInteger(port) || port <= 0 || port > 65535) {
-    console.error('[email] Invalid SMTP port:', portValue);
-    return null;
-  }
-
-  console.log('[email] SMTP configuration loaded:', {
+  const config = {
     host,
     port,
-    secure: port === 465,
-    user: user ? `${user.substring(0, 3)}***` : 'missing',
+    secure: true,
+
+    auth: {
+      user,
+      pass,
+    },
+
+    connectionTimeout: 30000,
+    greetingTimeout: 30000,
+    socketTimeout: 30000,
+  };
+
+  console.log('[email] SMTP configuration loaded:', {
+    host: config.host,
+    port: config.port,
+    secure: config.secure,
+    user: `${user.substring(0, 3)}***`,
     from,
   });
 
- return {
-  host,
-  port,
-
-  // Titan SMTP port 465 uses SSL
-  secure: true,
-
-  auth: {
-    user,
-    pass,
-  },
-
-  connectionTimeout: 30000,
-  greetingTimeout: 30000,
-  socketTimeout: 30000,
-};
+  return config;
 }
 
-export function getEmailErrorMessage(error: unknown) {
+/**
+ * Convert SMTP errors into user-friendly messages.
+ */
+export function getEmailErrorMessage(error: unknown): string {
   if (!(error instanceof Error)) {
-    return 'The mail server rejected the request. Please verify the deployment email settings.';
+    return 'Unable to send email. Please try again later.';
   }
 
   const message = error.message.toLowerCase();
@@ -118,62 +99,77 @@ export function getEmailErrorMessage(error: unknown) {
     message: error.message,
   });
 
-  // Missing configuration
-  if (
-    message.includes('missing smtp configuration') ||
-    message.includes('email service is not configured')
-  ) {
-    return 'Email service is not configured in the deployment environment.';
-  }
+  // -----------------------------
+  // Authentication errors
+  // -----------------------------
 
-  // Gmail authentication errors
   if (
     message.includes('authentication failed') ||
     message.includes('invalid login') ||
+    message.includes('invalid credentials') ||
     message.includes('535') ||
     message.includes('535-5.7.8')
   ) {
-    return 'SMTP authentication failed. Please verify your Gmail address and 16-digit Gmail App Password in Railway.';
+    return 'Titan SMTP authentication failed. Please verify the Titan email address and mailbox password configured in Railway.';
   }
 
+  // -----------------------------
   // DNS / hostname errors
+  // -----------------------------
+
   if (
     message.includes('enotfound') ||
     message.includes('getaddrinfo') ||
     message.includes('host not found')
   ) {
-    return 'SMTP host could not be found. Please verify EMAIL_HOST in Railway.';
+    return 'Titan SMTP server could not be found. Please verify the SMTP hostname.';
   }
 
-  // Timeout errors
+  // -----------------------------
+  // Connection timeout
+  // -----------------------------
+
   if (
     message.includes('etimedout') ||
     message.includes('timed out') ||
     message.includes('connection timeout')
   ) {
-    return 'SMTP connection timed out. Railway could not connect to the mail server. Please verify SMTP host, port, and provider settings.';
+    return 'Unable to connect to the Titan SMTP server. The SMTP connection timed out.';
   }
 
+  // -----------------------------
   // Connection refused
+  // -----------------------------
+
   if (
     message.includes('econnrefused') ||
     message.includes('connection refused')
   ) {
-    return 'SMTP connection was refused. Please verify the SMTP host and port.';
+    return 'Titan SMTP connection was refused. Please verify the SMTP server and port.';
   }
 
+  // -----------------------------
   // TLS / SSL errors
+  // -----------------------------
+
   if (
     message.includes('tls') ||
     message.includes('ssl') ||
     message.includes('certificate')
   ) {
-    return 'SMTP TLS/SSL connection failed. Please check whether the SMTP port uses SSL (465) or STARTTLS (587).';
+    return 'Titan SMTP SSL/TLS connection failed. Please verify the Titan SMTP security settings.';
   }
+
+  // -----------------------------
+  // Generic error
+  // -----------------------------
 
   return `Email sending failed: ${error.message}`;
 }
 
+/**
+ * Send email through Titan SMTP.
+ */
 export async function sendEmail(options: {
   to: string;
   replyTo?: string;
@@ -188,38 +184,55 @@ export async function sendEmail(options: {
     throw new Error('Email service is not configured.');
   }
 
-  const fromAddress = getEnv(
-    'EMAIL_FROM',
-    'SMTP_FROM',
-    'MAIL_FROM',
-    'EMAIL_USER',
-    'SMTP_USER',
-    'GMAIL_USER'
-  );
+  /**
+   * Use the authenticated Titan account as the sender.
+   */
+  const fromAddress = transporterConfig.auth.user;
 
-  const transporter = nodemailer.createTransport(transporterConfig);
+  const transporter = nodemailer.createTransport({
+    ...transporterConfig,
+
+    // Titan port 465 = direct SSL
+    secure: true,
+  });
 
   const mailOptions: SendMailOptions = {
     from: fromAddress,
+
     to: options.to,
+
     replyTo: options.replyTo,
+
     subject: options.subject,
+
     html: options.html,
+
     text: options.text,
+
     attachments: options.attachments,
   };
 
   try {
-    console.log('[email] Verifying SMTP connection...', {
+    console.log('[email] Verifying Titan SMTP connection...', {
       host: transporterConfig.host,
       port: transporterConfig.port,
       secure: transporterConfig.secure,
+      from: fromAddress,
+      to: options.to,
     });
 
+    /**
+     * Test SMTP connection and authentication.
+     */
     await transporter.verify();
 
-    console.log('[email] SMTP connection verified successfully.');
+    console.log(
+      '[email] Titan SMTP connection verified successfully.'
+    );
 
+    /**
+     * Send email.
+     */
     const info = await transporter.sendMail(mailOptions);
 
     console.log('[email] Email sent successfully:', {
@@ -230,13 +243,25 @@ export async function sendEmail(options: {
 
     return info;
   } catch (error) {
-    console.error('[email] SMTP send failed:', {
-      error: error instanceof Error ? error.message : 'Unknown SMTP error',
-      name: error instanceof Error ? error.name : 'Unknown',
+    console.error('[email] Titan SMTP send failed:', {
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Unknown SMTP error',
+
+      name:
+        error instanceof Error
+          ? error.name
+          : 'Unknown',
+
       host: transporterConfig.host,
+
       port: transporterConfig.port,
+
       secure: transporterConfig.secure,
+
       from: fromAddress,
+
       to: options.to,
     });
 
