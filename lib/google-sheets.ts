@@ -34,16 +34,29 @@ async function callSheetsWebhook(payload: SheetPayload) {
   return response.json();
 }
 
-export async function appendToSheet(sheet: string, values: Record<string, string>) {
+export async function appendToSheet(
+  sheet: string,
+  values: Record<string, string>,
+  options?: { requireSuccess?: boolean },
+) {
   try {
     const result = await callSheetsWebhook({ action: 'append', sheet, values });
     if (!result) {
       console.warn('[sheets] Webhook is not configured. Skipping Google Sheets append for', sheet);
+      if (options?.requireSuccess) {
+        throw new Error('Google Sheets webhook is not configured.');
+      }
       return { ok: false, skipped: true };
+    }
+    if (result.success === false) {
+      throw new Error(result.message || 'Google Sheets webhook rejected the submission.');
     }
     return { ok: true, skipped: false };
   } catch (error) {
     console.error('[sheets] Append failed', { sheet, error: error instanceof Error ? error.message : error });
+    if (options?.requireSuccess) {
+      throw error instanceof Error ? error : new Error('Google Sheets append failed.');
+    }
     return { ok: false, skipped: false };
   }
 }

@@ -53,6 +53,50 @@ export const HEAR_ABOUT_OPTIONS = [
   'Other',
 ] as const;
 
+/** Contact page form options (INR + conversion-focused labels). */
+export const CONTACT_SERVICE_OPTIONS = [
+  'Website Development',
+  'Web Application Development',
+  'Mobile Application Development',
+  'Custom Software Development',
+  'UI/UX Design',
+  'ERP / CRM Solutions',
+  'E-Commerce Development',
+  'Cloud Solutions',
+  'API Integration',
+  'IT Consulting',
+  'Maintenance & Support',
+  'Other',
+] as const;
+
+export const CONTACT_BUDGET_OPTIONS = [
+  'Under ₹25,000',
+  '₹25,000 – ₹50,000',
+  '₹50,000 – ₹1,00,000',
+  '₹1,00,000 – ₹3,00,000',
+  '₹3,00,000 – ₹5,00,000',
+  'Above ₹5,00,000',
+  'Not Decided Yet',
+] as const;
+
+export const CONTACT_TIMELINE_OPTIONS = [
+  'Immediately',
+  'Within 1 Month',
+  '1–3 Months',
+  '3–6 Months',
+  'Flexible',
+] as const;
+
+export const CONTACT_HEAR_ABOUT_OPTIONS = [
+  'Google Search',
+  'LinkedIn',
+  'Instagram',
+  'Facebook',
+  'Referral',
+  'Existing Client',
+  'Other',
+] as const;
+
 export const POSITION_OPTIONS = [
   'Senior Full Stack Developer',
   'UI/UX Designer',
